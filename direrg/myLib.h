@@ -13,14 +13,13 @@ extern "C" {
 
 typedef void * Func(char ch[]);
 
-
 int Space(int deep);
 
-int getDir(void * mydir);
+int Vist(void * tfile);
 
-int isDir(void * mydir);
+int myErg(void * mydir, Func myVist, int deep);
 
-int myErg(void * mydir, Func Vist, int deep);
+int Ergotic(int argc, char * argv[], Func Vist);
 
 #ifdef __cplusplus
 }

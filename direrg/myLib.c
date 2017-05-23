@@ -5,7 +5,6 @@
  *      Author: JYS1105
  */
 
-
 #include "myLib.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -27,33 +26,11 @@ int Space(int deep)
 	return 0;
 }
 
-int getDir(void * mydir)
-{
-	int Eret = 0;
-	char mycwd[1024*32];
-	getcwd(mycwd, sizeof(mycwd));
-
-	strcpy(mydir, mycwd);
-
-	return Eret;
-}
-
-int isDir(void * mydir)
-{
-	int Eret = 0;
-
-	char * tch = mydir;
-
-	Eret = access(tch, F_OK);
-
-	return Eret;
-}
 
 int myErg(void * mydir, Func Vist, int deep)
 {
 	int Eret = 0;
 
-	int ict = 0;
 	DIR * dirp = NULL;
 	char tcwd[1024 * 32];
 	struct dirent * tfile;
@@ -74,34 +51,71 @@ int myErg(void * mydir, Func Vist, int deep)
 	// 遍历文件
 	while ((tfile = readdir(dirp)) != NULL)
 	{
-		if (tfile->d_name[0] != '.')
-		{
-			ict++;
-			if (tfile->d_type != 4)
-			{
-				Space(deep);
-				Vist((void *)tfile);
-			}
-		}
+		// 判断是否为目录文件  或 .* 目录
+		if (tfile->d_type == 4 || tfile->d_name[0] == '.')
+			continue;	// 目录文件
+
+		Space(deep);
+		Vist((void *)tfile);
 	}
 
 	// 遍历目录
 	rewinddir(dirp);
 	while ((tfile = readdir(dirp)) != NULL)
 	{
-		if (tfile->d_name[0] != '.')
-			if (tfile->d_type == 4)
-			{
-				Space(deep);
-				Vist((void *)tfile);
+		// 判断是否为目录文件  或 .* 目录
+		if (tfile->d_type != 4 || tfile->d_name[0] == '.')
+			continue;	// 非目录文件或 .* 目录
 
-				memset(tcwd, 0,sizeof(tcwd));
-				sprintf(tcwd, "%s/%s", (char *)mydir, tfile->d_name);
+		Space(deep);
+		Vist((void *)tfile);
 
-				myErg(tcwd, Vist, deep + 1);
-			}
+		memset(tcwd, 0,sizeof(tcwd));
+		sprintf(tcwd, "%s/%s", (char *)mydir, tfile->d_name);
+
+		myErg(tcwd, Vist, deep + 1);
 	}
 
 End1:
 	return Eret;
 }
+
+
+
+int Ergotic(int argc, char * argv[], Func Vist)
+{
+	int Eret = 0;
+
+		char tcwd[1024 * 32];
+		int itc = 0;
+
+		if (argv == NULL)
+		{
+			printf("Error:");
+			return -1;
+		}
+
+		if (argc == 1)
+		{
+			itc = 1;
+			getcwd(tcwd, sizeof(tcwd));
+		}
+		else
+		{
+			itc = argc - 1;
+			strcpy(tcwd, argv[itc]);
+		}
+
+		if ((Eret = access(tcwd, F_OK)))
+			return Eret;
+
+		do
+		{
+			printf(".\n");
+			myErg(tcwd, Vist, 1);
+			itc++;
+		}while(itc < argc);
+
+		return Eret;
+}
+
