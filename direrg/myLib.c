@@ -22,7 +22,7 @@ int Space(int deep)
 	while(++idp < deep)
 		printf("    ");
 
-	printf("|——");
+	printf("|—— ");
 	return 0;
 }
 
