@@ -62,7 +62,7 @@ int Vist(void * tfile)
 		return -1;
 	}
 
-	printf(" %s\n", myf->d_name);
+	printf("%s\n", myf->d_name);
 
 	return Eret;
 }

@@ -23,7 +23,7 @@ int Space(int deep)
 	while(++idp < deep)
 		printf("    ");
 
-	printf("|——", (char)192, (char)196);
+	printf("|——");
 	return 0;
 }
 
@@ -52,7 +52,10 @@ int isDir(void * mydir)
 int myErg(void * mydir, Func Vist, int deep)
 {
 	int Eret = 0;
+
+	int ict = 0;
 	DIR * dirp = NULL;
+	char tcwd[1024 * 32];
 	struct dirent * tfile;
 
 	if (mydir == NULL)
@@ -63,30 +66,42 @@ int myErg(void * mydir, Func Vist, int deep)
 	}
 
 	dirp = opendir(mydir);
+	if (dirp == NULL)
+	{
+		goto End1;
+	}
 
+	// 遍历文件
 	while ((tfile = readdir(dirp)) != NULL)
 	{
-		if (tfile->d_type != 4)
+		if (tfile->d_name[0] != '.')
 		{
-			Space(deep);
-			Vist((void *)tfile);
+			ict++;
+			if (tfile->d_type != 4)
+			{
+				Space(deep);
+				Vist((void *)tfile);
+			}
 		}
 	}
 
+	// 遍历目录
 	rewinddir(dirp);
 	while ((tfile = readdir(dirp)) != NULL)
 	{
-		if (tfile->d_type == 4)
-			if (strcmp(tfile->d_name, ".") != 0 && strcmp(tfile->d_name, "..") != 0)
+		if (tfile->d_name[0] != '.')
+			if (tfile->d_type == 4)
 			{
 				Space(deep);
 				Vist((void *)tfile);
 
-				deep++;
-				myErg(tfile->d_name, Vist, deep);
-				deep--;
+				memset(tcwd, 0,sizeof(tcwd));
+				sprintf(tcwd, "%s/%s", (char *)mydir, tfile->d_name);
+
+				myErg(tcwd, Vist, deep + 1);
 			}
 	}
 
+End1:
 	return Eret;
 }
